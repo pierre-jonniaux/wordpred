@@ -1,0 +1,45 @@
+---
+title: "WordPred <br/> Natural Language Processing helps you type"
+author: "Pierre Jonniaux"
+output: 
+    slidy_presentation:
+        css: quartz.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## CONCEPT  
+
+- An online application that tries to predict the user's sentence next word. Can be adapted as an helper for automatic message completion. 
+- Built in the context of John Hopkins university's data science course as the final project. 
+- Built using Natural Language Processing (NLP) methods on training data kindly provided by the SwiftKey corporation.
+- Uses Katz's backoff model augmented with a weighting coefficient and close skipgrams as prediction method.  
+- Written in R using Quanteda for NLP tasks, data.table for data handling and Shiny for application creation. 
+
+## DATA  
+- Around 600Mb of raw English text that amounts to ~100 millions words distributed among three corpus: blogs, news and twitter feed. 
+- Due to RAM limitations, each ~200mb corpus was split into ~10mb text files before processing.  
+- Each text was tokenised i.e. split into "token units". Stemming, lemmatisation and stopwords-removal were not deemed appropriate in this context. The tokens (~words) were however expunged of numbers, non-ascii characters, some profanity and punctuation symbols.  
+- Ngrams (sequence of words) and their corresponding "last word" from length 5 to 1 were generated. Skipgrams of length 2 were generated from 3gram data. 
+- One time only occuring ngram, while files still split, were removed, leading to drastic data reduction. 
+- Ngram data files were recombined amounting to an approximate ~30 Mb total data set, ~20times less than the original data. 
+
+
+## METHOD  
+
+- Based on simple Backoff method where query is matched against ngrams of decreasing lengths until matching occurs. Ngrams' corresponding last words are proposed as predictions, the most recurring one being considered the most credible.  
+- Even if query matched, decremental search continues. All matching ngrams/last words pair and their count are tallied to get a final score for each proposition. Each time ngrams are shortened, a coefficient is applied to reduce their weight in the final score. 
+- To make the most of the information closest to the word to predict, contained in the ngrams of lenght 3 and below were most of the matches occurs, skipgrams of length 2 were also generated from those 3grams. I.e. all 2ngrams combinations among the 3grams are used and matched against a query formatted accordingly.
+- At that step, if found predictions are still too few, the query is matched against the unigrams. 
+
+## THE APPLICATION
+![WordPred on Shinyapps.io](wordPred3.png){width=100%}
+
+  
+- The slider allows the user to change the number of predictions. Predictions with the best score come on top.  
+- The user can choose to use information provided by the skipgrams or not.  
+<b/>  
+
+Application available here <https://tapewormer.shinyapps.io/wordPred/>
